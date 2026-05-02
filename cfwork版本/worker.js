@@ -329,43 +329,64 @@ function handleUI(request) {
     <title>Cherry-Link 驾驶舱</title>
     <style>
         :root { --bg: #0f172a; --panel: #1e293b; --text: #e2e8f0; --accent: #f43f5e; --success: #10b981; --border: #334155; }
-        body { margin: 0; font-family: 'Segoe UI', monospace; background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
-        .sidebar { width: 340px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-        .main { flex: 1; display: flex; flex-direction: column; padding: 20px; gap: 20px; }
+        * { box-sizing: border-box; }
+        html { min-height: 100%; background: var(--bg); }
+        body { margin: 0; font-family: 'Segoe UI', monospace; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+        .sidebar { width: 340px; max-width: 100%; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        .main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 20px; gap: 20px; }
         
-        h1 { margin: 0; font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        h1 { margin: 0; font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .badge { font-size: 10px; background: var(--accent); color: #fff; padding: 2px 6px; border-radius: 4px; }
         
-        .card { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+        .card { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border); min-width: 0; }
         .label { font-size: 12px; color: #94a3b8; margin-bottom: 5px; display: block; font-weight: 600; }
-        .value-box { background: #0f172a; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 11px; word-break: break-all; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
+        .value-box { background: #0f172a; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 11px; overflow-wrap: anywhere; word-break: break-word; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
         .value-box:hover { border-color: var(--accent); }
         
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; flex: 0 0 auto; }
         .status-ok { background: var(--success); box-shadow: 0 0 5px var(--success); }
         .status-err { background: #ef4444; box-shadow: 0 0 5px #ef4444; }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
-        .tab { background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 8px 10px; border-bottom: 2px solid transparent; font-size: 12px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab { background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 10px 12px; border-bottom: 2px solid transparent; font-size: 12px; white-space: nowrap; flex: 0 0 auto; }
         .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: bold; }
         
         .guide-content { font-size: 12px; line-height: 1.6; color: #cbd5e1; display: none; }
         .guide-content.active { display: block; }
-        code { background: #334155; padding: 2px 4px; border-radius: 3px; color: #fff; font-family: monospace; }
+        code { background: #334155; padding: 2px 4px; border-radius: 3px; color: #fff; font-family: monospace; overflow-wrap: anywhere; word-break: break-word; }
         
-        .terminal { flex: 1; background: #000; border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; font-family: monospace; font-size: 12px; }
-        .logs { flex: 1; padding: 15px; overflow-y: auto; color: #a5b4fc; }
+        .terminal { flex: 1; min-height: 0; background: #000; border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; font-family: monospace; font-size: 12px; }
+        .logs { flex: 1; min-height: 0; padding: 15px; overflow-y: auto; overflow-x: hidden; color: #a5b4fc; }
         .input-area { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: var(--panel); }
-        input { flex: 1; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 4px; }
-        button { background: var(--accent); color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        input { flex: 1; min-width: 0; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 4px; font-size: 16px; }
+        button { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; min-height: 40px; }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
+        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #1e293b; padding-bottom: 2px; overflow-wrap: anywhere; word-break: break-word; }
         .log-time { color: #64748b; margin-right: 8px; }
         .log-type { font-weight: bold; margin-right: 8px; }
         .log-req { color: #38bdf8; } .log-res { color: #4ade80; } .log-err { color: #f87171; }
         
         .highlight { color: var(--accent); font-weight: bold; }
+
+        @media (max-width: 720px) {
+            body { min-height: 100dvh; display: block; overflow-y: auto; }
+            .sidebar { width: 100%; border-right: 0; border-bottom: 1px solid var(--border); padding: 14px; gap: 12px; overflow: visible; }
+            .main { padding: 14px; min-height: 55dvh; }
+            h1 { font-size: 17px; }
+            .card { padding: 10px; }
+            .terminal { min-height: 52dvh; max-height: 70dvh; }
+            .logs { min-height: 260px; padding: 12px; }
+            .input-area { position: sticky; bottom: 0; flex-direction: column; gap: 8px; padding: 10px; }
+            button { width: 100%; padding: 12px 16px; }
+            .tabs { margin-left: -2px; margin-right: -2px; }
+        }
+
+        @media (max-width: 420px) {
+            .sidebar, .main { padding: 10px; }
+            .value-box, .guide-content, .terminal { font-size: 11px; }
+            .tab { padding: 9px 10px; }
+        }
     </style>
 </head>
 <body>
@@ -396,9 +417,9 @@ function handleUI(request) {
         <div class="card">
             <span class="label">客户端集成指南</span>
             <div class="tabs">
-                <button class="tab active" onclick="showGuide('immersive')">沉浸式翻译</button>
-                <button class="tab" onclick="showGuide('nextchat')">NextChat</button>
-                <button class="tab" onclick="showGuide('curl')">cURL</button>
+                <button class="tab active" onclick="showGuide('immersive', this)">沉浸式翻译</button>
+                <button class="tab" onclick="showGuide('nextchat', this)">NextChat</button>
+                <button class="tab" onclick="showGuide('curl', this)">cURL</button>
             </div>
             
             <div id="immersive" class="guide-content active">
@@ -417,7 +438,8 @@ function handleUI(request) {
             </div>
             <div id="curl" class="guide-content">
                 <code>curl ${origin}/v1/chat/completions \<br>
-                -H "Authorization: Bearer ${apiKey}" \<br>
+                -H "Authorization: Bearer ***" \<br>
+                -H "Content-Type: application/json" \<br>
                 -d '{"model": "${CONFIG.DEFAULT_MODEL}", "messages": [{"role":"user","content":"hi"}]}'</code>
             </div>
         </div>
@@ -442,11 +464,11 @@ function handleUI(request) {
             alert('已复制到剪贴板');
         }
 
-        function showGuide(id) {
+        function showGuide(id, target) {
             document.querySelectorAll('.guide-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
+            if (target) target.classList.add('active');
         }
 
         function log(type, msg) {
