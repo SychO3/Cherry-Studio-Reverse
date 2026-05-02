@@ -186,32 +186,63 @@ async function handleChat(request) {
       let fullContent = "";
       let usage = null;
       let finishReason = "stop";
+      let sseBuffer = "";
+
+      function consumeSseEvent(eventText) {
+        const dataLines = [];
+
+        for (const line of eventText.split('\n')) {
+          if (line.startsWith('data:')) {
+            dataLines.push(line.slice(5).trimStart());
+          }
+        }
+
+        if (dataLines.length === 0) return;
+
+        const dataStr = dataLines.join('\n').trim();
+        if (!dataStr || dataStr === '[DONE]') return;
+
+        const json = JSON.parse(dataStr);
+        const choice = json.choices && json.choices[0];
+
+        // OpenAI 流式响应: choices[0].delta.content
+        if (choice && choice.delta && typeof choice.delta.content === 'string') {
+          fullContent += choice.delta.content;
+        }
+
+        // 兼容少数上游直接返回 message.content 的非流式片段
+        if (choice && choice.message && typeof choice.message.content === 'string') {
+          fullContent += choice.message.content;
+        }
+
+        if (json.usage) usage = json.usage;
+        if (choice && choice.finish_reason) finishReason = choice.finish_reason;
+      }
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.slice(6).trim();
-            if (dataStr === '[DONE]') continue;
-            
-            try {
-              const json = JSON.parse(dataStr);
-              // 累积内容
-              if (json.choices && json.choices[0].delta.content) {
-                fullContent += json.choices[0].delta.content;
-              }
-              // 捕获 usage (如果有)
-              if (json.usage) usage = json.usage;
-              // 捕获 finish_reason
-              if (json.choices && json.choices[0].finish_reason) {
-                finishReason = json.choices[0].finish_reason;
-              }
-            } catch (e) { }
+
+        sseBuffer += decoder.decode(value, { stream: true });
+        const events = sseBuffer.split('\n\n');
+        sseBuffer = events.pop() || "";
+
+        for (const eventText of events) {
+          try {
+            consumeSseEvent(eventText);
+          } catch (e) {
+            // 单个异常事件不应中断整次聚合
+          }
+        }
+      }
+
+      sseBuffer += decoder.decode();
+      if (sseBuffer.trim()) {
+        for (const eventText of sseBuffer.split('\n\n')) {
+          try {
+            consumeSseEvent(eventText);
+          } catch (e) {
+            // 忽略末尾不完整或异常事件
           }
         }
       }
