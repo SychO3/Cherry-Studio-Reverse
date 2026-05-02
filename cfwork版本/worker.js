@@ -23,8 +23,8 @@ const CONFIG = {
   // 上游接口地址
   UPSTREAM_URL: "https://api.cherry-ai.com/chat/completions",
   
-  // 锁定模型
-  DEFAULT_MODEL: "glm-4.5-flash",
+  // 官方 CherryAI 模型名称
+  DEFAULT_MODEL: "qwen",
 
     // 默认访问密码 (请在 Cloudflare 环境变量 API_MASTER_KEY 中设置)
   DEFAULT_API_KEY: "1",
@@ -112,7 +112,7 @@ function handleModels(request) {
       id: CONFIG.DEFAULT_MODEL,
       object: "model",
       created: Math.floor(Date.now() / 1000),
-      owned_by: "cherry-link"
+      owned_by: "cherryai"
     }]
   }), { headers: corsHeaders({ 'Content-Type': 'application/json' }) });
 }
@@ -401,7 +401,7 @@ function handleUI(request) {
                 ${hasSecret ? 'HMAC 密钥已配置' : '⚠️ 未配置 HMAC_SECRET_KEY'}
             </div>
             <div style="font-size: 11px; color: #64748b; margin-top: 5px;">
-                模型锁定: <span style="color: #e2e8f0">${CONFIG.DEFAULT_MODEL}</span>
+                CherryAI 模型: <span style="color: #e2e8f0">${CONFIG.DEFAULT_MODEL}</span> <span style="color: #64748b">(Qwen)</span>
             </div>
         </div>
 
