@@ -143,8 +143,12 @@ async function handleChat(request) {
     // 沉浸式翻译通常不传 stream 或传 false
     const isStream = rawBody.stream === true;
 
+    // 非流式客户端也强制向上游请求 SSE；后面再聚合成标准 JSON。
+    // 签名必须和实际发送给上游的 body 完全一致。
+    const upstreamBody = isStream ? rawBody : { ...rawBody, stream: true };
+
     // 生成签名
-    const signatureHeaders = await generateSignature(rawBody, request.ctx.hmacKey);
+    const signatureHeaders = await generateSignature(upstreamBody);
 
     // 构造上游请求
     const upstreamHeaders = {
@@ -156,7 +160,7 @@ async function handleChat(request) {
     const response = await fetch(CONFIG.UPSTREAM_URL, {
       method: "POST",
       headers: upstreamHeaders,
-      body: JSON.stringify(rawBody)
+      body: JSON.stringify(upstreamBody)
     });
 
     if (!response.ok) {
