@@ -401,7 +401,8 @@ function handleUI(request) {
                 ${hasSecret ? 'HMAC 密钥已配置' : '⚠️ 未配置 HMAC_SECRET_KEY'}
             </div>
             <div style="font-size: 11px; color: #64748b; margin-top: 5px;">
-                CherryAI 模型: <span style="color: #e2e8f0">${CONFIG.DEFAULT_MODEL}</span> <span style="color: #64748b">(Qwen)</span>
+                官方模型: <span style="color: #e2e8f0">${CONFIG.DEFAULT_MODEL}</span><br>
+                实际上游: <span style="color: #e2e8f0">Qwen/Qwen3-8B</span>
             </div>
         </div>
 
