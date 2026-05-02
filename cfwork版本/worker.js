@@ -347,8 +347,8 @@ function handleUI(request) {
         .status-ok { background: var(--success); box-shadow: 0 0 5px var(--success); }
         .status-err { background: #ef4444; box-shadow: 0 0 5px #ef4444; }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab { background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 10px 12px; border-bottom: 2px solid transparent; font-size: 12px; white-space: nowrap; flex: 0 0 auto; }
+        .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .tab { background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 10px 8px; border-bottom: 2px solid transparent; font-size: 12px; white-space: nowrap; min-width: 0; }
         .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: bold; }
         
         .guide-content { font-size: 12px; line-height: 1.6; color: #cbd5e1; display: none; }
@@ -379,13 +379,14 @@ function handleUI(request) {
             .logs { min-height: 260px; padding: 12px; }
             .input-area { position: sticky; bottom: 0; flex-direction: column; gap: 8px; padding: 10px; }
             button { width: 100%; padding: 12px 16px; }
-            .tabs { margin-left: -2px; margin-right: -2px; }
+            .tabs { margin-left: 0; margin-right: 0; gap: 4px; }
+            .tab { padding: 10px 4px; font-size: 11px; }
         }
 
         @media (max-width: 420px) {
             .sidebar, .main { padding: 10px; }
             .value-box, .guide-content, .terminal { font-size: 11px; }
-            .tab { padding: 9px 10px; }
+            .tab { padding: 9px 3px; font-size: 10px; }
         }
     </style>
 </head>
