@@ -1,0 +1,3 @@
+name = "cherry"
+main = "cfwork版本/worker.js"
+compatibility_date = "2026-05-02"
