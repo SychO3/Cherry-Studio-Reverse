@@ -148,7 +148,7 @@ async function handleChat(request) {
     const upstreamBody = isStream ? rawBody : { ...rawBody, stream: true };
 
     // 生成签名
-    const signatureHeaders = await generateSignature(upstreamBody);
+    const signatureHeaders = await generateSignature(upstreamBody, request.ctx.hmacKey);
 
     // 构造上游请求
     const upstreamHeaders = {
